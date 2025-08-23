@@ -1,0 +1,37 @@
+### Define variables
+@baseUrl = http://localhost:8080
+@token = eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhbnVwYUBnbWFpbC5jb20iLCJpYXQiOjE3NTU5Mzc4NDEsImV4cCI6MTc1NjAyNDI0MX0.p-pQ8LfUdvyxaQFaIJsNxZCUEzhflNwQ9vYNTD-qovil87AQcpjRSEOm6uv79RbR
+
+### GET employee by id
+GET {{baseUrl}}/api/employees/1
+Authorization: Bearer {{token}}
+
+### GET all employees
+GET {{baseUrl}}/api/employees
+Authorization: Bearer {{token}}
+
+### Send POST request with json body
+POST {{baseUrl}}/api/employees
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "firstName": "Nilupula",
+  "lastName": "Perera",
+  "email": "nilupula@gmail.com"
+}
+
+### update employee by id
+PUT {{baseUrl}}/api/employees/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "firstName": "Anupa",
+  "lastName": "Dulan",
+  "email": "dulan@gmail.com"
+}
+
+### DELETE employee by id
+DELETE {{baseUrl}}/api/employees/2
+Authorization: Bearer {{token}}
