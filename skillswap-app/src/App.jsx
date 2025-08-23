@@ -1,19 +1,30 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import {BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
+
+//pages
+import Home from './pages/main/Home';
+import Signup from './pages/main/Signup';
+import Login from './pages/main/Login';
+import HowItWorks from './pages/main/HowItWorks';
+import About from './pages/main/About';
+
+//components
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold text-blue-600 mb-4">
-          Tailwind CSS v3 is Working! 🎉
-        </h1>
-        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-          Success Button
-        </button>
-      </div>
-    </div>
+    <BrowserRouter>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Home/>} />
+        <Route path="/signup" element={<Signup/>} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/how-it-works" element={<HowItWorks />} />
+        <Route path="/about" element={<About />} />
+      </Routes>
+      <Footer />
+    </BrowserRouter>
   )
 }
 

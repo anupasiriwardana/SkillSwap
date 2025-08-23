@@ -6,10 +6,13 @@ import com.learnjava.skillswapapi.controller.AuthenticationResponse;
 import com.learnjava.skillswapapi.controller.RegisterRequest;
 import com.learnjava.skillswapapi.entity.Role;
 import com.learnjava.skillswapapi.entity.User;
+import com.learnjava.skillswapapi.exception.UserAlreadyExistsException;
 import com.learnjava.skillswapapi.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +24,13 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    public AuthenticationResponse register(RegisterRequest request){
+    public String register(RegisterRequest request){
+
+        // Check if user already exists
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new UserAlreadyExistsException("User with this email already exists");
+        }
+
         var user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
@@ -30,24 +39,32 @@ public class AuthenticationService {
                 .role(Role.USER)  //set ROLE
                 .build();
         userRepository.save(user);  //save user to db
-        var jwtToken = jwtService.generateToken(user);
-        return AuthenticationResponse.builder()   //return token
-                .token(jwtToken)
-                .build();
+        return "User registered successfully";
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request){
-        authenticationManager.authenticate(   //verify credentials
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
+        try {
+            authenticationManager.authenticate(   //verify credentials
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(),
+                            request.getPassword()
+                    )
+            );
+        } catch (Exception e) {
+            throw new BadCredentialsException("Invalid Email or Password");
+        }
+
         var user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow();
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
         var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
-                .token(jwtToken)   //return the jwt key
+                .token(jwtToken)//return the jwt key
+                .id(user.getId())
+                .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .role(user.getRole())
                 .build();
     }
 }

@@ -1,5 +1,6 @@
 package com.learnjava.skillswapapi.config;
 
+import com.learnjava.skillswapapi.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -31,7 +32,15 @@ public class JwtService {
 
     //Creates new passports (JWT tokens) for authenticated users
     public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);     // Calls the advanced version
+
+        User user = (User) userDetails;
+        Map<String, Object> extraClaims = new HashMap<>();
+        extraClaims.put("email", user.getEmail());
+        extraClaims.put("userID", user.getId());
+        extraClaims.put("firstName", user.getFirstName());
+        extraClaims.put("lastName", user.getLastName());
+
+        return generateToken(extraClaims, userDetails);     // Calls the advanced version
     }
 
     //why2 generate token func ->> method overloading
@@ -42,7 +51,7 @@ public class JwtService {
             UserDetails userDetails
     ) {
         return Jwts.builder()
-                .claims(extraClaims)
+                .claims(extraClaims)        // Extra user details go here
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiration))
@@ -68,6 +77,22 @@ public class JwtService {
     //Reads information from existing passports(tokens)
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+
+    public Integer extractUserId(String token) {
+        return extractClaim(token, claims -> claims.get("userId", Integer.class));
+    }
+
+    public String extractFirstName(String token) {
+        return extractClaim(token, claims -> claims.get("firstName", String.class));
+    }
+
+    public String extractLastName(String token) {
+        return extractClaim(token, claims -> claims.get("lastName", String.class));
+    }
+
+    public String extractRole(String token) {
+        return extractClaim(token, claims -> claims.get("role", String.class));
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
@@ -114,3 +139,14 @@ public class JwtService {
 //        extraClaims.put("preferences", user.getPreferences());
 //
 //String token = jwtService.generateToken(extraClaims, userDetails);
+
+
+//In your controllers or services, you can now get user details directly from the token:
+    // Get user ID from token
+    //Long userId = jwtService.extractUserId(token);
+
+    // Get user role from token
+    //String role = jwtService.extractRole(token);
+
+    // Get full name from token
+    //String fullName = jwtService.extractFirstName(token) + " " + jwtService.extractLastName(token);
