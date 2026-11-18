@@ -1,34 +1,41 @@
 package com.learnjava.skillswapapi.entity;
 
-
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
-@Builder
+import java.time.Instant;
+import java.util.Locale;
+
 @Entity
-@Data // Lombok annotation to generate getters, setters, toString, etc.
-@NoArgsConstructor // Lombok generates a no-args constructor
-@AllArgsConstructor // Lombok generates a constructor with all arguments
 @Table(name = "skills")
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Skill {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
-    @Column(name = "skill_name", nullable = false, unique = true)
-    private String skillName;
+    @Column(nullable = false, length = 80)
+    private String name;
 
-    @Column(name = "category", nullable = false)
-    private String category;
+    /** Lower-cased, whitespace-collapsed name used for matching, so "Guitar " and "guitar" are one skill. */
+    @Column(name = "normalized_name", nullable = false, unique = true, length = 80)
+    private String normalizedName;
 
-    @Column(name = "base_point_cost", nullable = false)
-    private Integer basePointCost;
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
 
-    @Column(name = "base_demand_multiplier", nullable = false)
-    private Double baseDemandMultiplier;
+    public static String tidy(String name) {
+        return name.trim().replaceAll("\\s+", " ");
+    }
 
+    public static String normalize(String name) {
+        return tidy(name).toLowerCase(Locale.ROOT);
+    }
 }

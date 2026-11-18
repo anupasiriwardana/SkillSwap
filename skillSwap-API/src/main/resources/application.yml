@@ -1,0 +1,59 @@
+spring:
+  application:
+    name: skillswap-api
+  config:
+    # Local development: read secrets from the repo-root .env (git-ignored).
+    # In Docker the same values arrive as real environment variables instead.
+    import:
+      - optional:file:.env[.properties]
+      - optional:file:../.env[.properties]
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      # Supabase's pooler has a small connection budget on the free tier
+      maximum-pool-size: 5
+      minimum-idle: 1
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+        type:
+          # Store Instants in plain TIMESTAMP columns (always UTC, see time_zone above)
+          preferred_instant_jdbc_type: TIMESTAMP
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+server:
+  port: 8080
+  error:
+    include-message: never
+  forward-headers-strategy: framework
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+  admin:
+    email: ${ADMIN_EMAIL:}
+    password: ${ADMIN_PASSWORD:}
+  cors:
+    # Only needed when the frontend is served from a different origin than the API.
+    # The Vite dev server and the nginx container both proxy /api, so this is usually empty.
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:}
