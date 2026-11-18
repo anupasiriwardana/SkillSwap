@@ -1,45 +1,60 @@
 package com.learnjava.skillswapapi.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
-@Data
+import java.time.Instant;
+
+/** A skill a user offers to teach or wants to learn. */
+@Entity
+@Table(name = "user_skills")
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "user_skills",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "skill_id", "type"}))
 public class UserSkill {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
-    @Column(name = "user_id", nullable = false)
-    private Integer userId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    @Column(name = "skill_id", nullable = false)
-    private Integer skillId;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "type", nullable = false)
-    private SkillType type; // TEACH, LEARN, BOTH
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "skill_id", nullable = false)
+    private Skill skill;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "proficiency")
-    private ProficiencyLevel proficiency; // BEGINNER, INTERMEDIATE, ADVANCED, EXPERT
+    @Column(nullable = false, length = 10)
+    private SkillType type;
 
-    @Column(name = "is_online", nullable = false)
-    private Boolean isOnline = false;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private ProficiencyLevel level;
 
-    @Column(name = "is_physical", nullable = false)
-    private Boolean isPhysical = false;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private LearningMode mode;
 
-    @Column(name = "description")
+    @Column(length = 1000)
     private String description;
 
+    @Column(length = 100)
+    private String city;
+
+    @Column(length = 255)
+    private String location;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
 }

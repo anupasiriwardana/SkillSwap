@@ -1,0 +1,24 @@
+# SkillSwap: the API and the web app. The database is hosted on Supabase, so it is not a container here.
+# Usage: copy .env.example to .env, fill it in, then run `docker compose up -d --build`.
+
+services:
+  api:
+    build: ./skillSwap-API
+    container_name: skillswap-api
+    env_file: .env
+    # Only reachable from the app container; nginx forwards /api to it
+    expose:
+      - "8080"
+    mem_limit: 512m
+    restart: unless-stopped
+
+  app:
+    build: ./skillswap-app
+    container_name: skillswap-app
+    ports:
+      - "${APP_PORT:-3000}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    mem_limit: 64m
+    restart: unless-stopped
